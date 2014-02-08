@@ -1,4 +1,4 @@
-bufferAttacks
+System and Network Security
 =============
 
-This is my security assignment which I work upon in SIL765. 
+Contains the projects from a very interesting course(SIL765) that I'm doing.
