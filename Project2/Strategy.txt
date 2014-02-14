@@ -1,0 +1,58 @@
+﻿Overview of the attack:
+This heapspray attack is done very much like the heap spray attack in the nozzle paper.
+We construct a large nopsled and concatenate a copy of the attackcode that has
+been converted to the %uxxxx format. This combination of string is then sprayed in many
+random places. Afterwards, we jump to the nop+attackcode string using the
+navigator.pwnme() method.
+
+The Nopsled:
+We have created a 64Kb string consisting only of Nops. This is added to increase the
+probability of a successful attack. At the end of this string we have the attackcode.
+We have used JavaScript array object to do the spraying. we ensure that we retain
+references to all of our sprayed objects and the JavaScript GC shouldn't try and
+collect them.
+
+The AttackString:
+The attackstring has been modified to do a vfork and then bindshell on 8080 using
+netcat. The code which was originally given was just doing an exec, which would lead
+to termination of Iceweasel. We wanted to make the attack stealthy, thus just doing
+exec would be a bad idea. We also tried doing fork and then exec, but that did not
+succeed because Firefox takes large memory. Fork() essentially creates a copy of the
+parent process. Creating a copy of Firefox is not allowed in this low memory VM.
+Thus we decided to go with vfork and exec. Vfork only follows copy on write procedure.
+So all the physical pages are not copies in this case.
+After doing a vfork, we just exec our netcat to bind a shell on 8080.
+In parent process we just return. This ensures that the user's browsing session is not
+affected.
+
+PwnAddress:
+We discovered the pid of the iceweasel process using pstree -p. After spraying and
+breaking in gdb we examine the smaps of the process in /proc/ProcessID/smaps.
+We see the largest chunk which can contain the sprayed data. After doing this
+several times, we've found that address 0x9xxxxxxx to 0xbxxxxxxx can contain the
+spraycontainer. After looking this up in gdb, we've decided to use the 0xa2083ff0.
+This address is around 60% above the initial spraycode. Thus ASLR won't affect this
+address. Also user can have 10-15 tabs open before the spray, thus address will still
+be valid.
+
+Improvements:
+Following improvements have been made from a normal heapspray attack:
+-- Unlike in the NOZZLE paper, we are not doing all the spray at once, as it results
+in slow down of the browser. I've a functions which gets called every 500ms,
+which sprays 300 objects at once. This reduces the slowdown considerably. In total
+3000 objects are sprayed onto the heap. This value was chosen as a balance between
+segfaulting because we had not sprayed enough and getting killed by the Linux
+OOM-killer because we had sprayed too much.
+
+-- After the vfork(), when parent process is returned in the original state. We give
+up the references to the spraycontainer array. This means that JavaScript GC will now
+collect this string and thus free the memory. This will help the user to
+continuously use the browser without any interference. At all this time, a process
+is running in the background, which will keep port 8080 alive.
+
+Thus,
+we've exploited the navigator.pwnme() vulnerability to create a new process that
+binds a shellcode to port 8080 using nc. User will have no clue about this attack,
+as we are properly handling the memory usage and normal browsing is allowed.
+
+ 
